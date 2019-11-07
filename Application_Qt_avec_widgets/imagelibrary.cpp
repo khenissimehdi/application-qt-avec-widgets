@@ -14,11 +14,49 @@ ImageLibrary::ImageLibrary(QWidget *parent) :QMainWindow(parent),model(parent), 
 
 
 
+
+}
+
+
+Worker::Worker(const QString & path):path(path)
+{
+}
+
+void Worker::process()
+{
+  QStringList List ;
+  QFileInfo file;
+  file.setFile(path);
+
+  if(file.isFile())
+  {
+      List.append(path);
+
+
+  }
+  else
+  {
+      while(file.isDir())
+      {
+          List.append(path);
+
+      }
+
+  }
+
+
+
+
+
 }
 void ImageLibrary::go()
 {
+
+    QSettings settings;
+    QString newDir=settings.value("", QDir::homePath()).toString();
+
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                    QDir::homePath(),
+                                                    newDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
     if(dir.isEmpty())
@@ -27,7 +65,14 @@ void ImageLibrary::go()
     }
     else
     {
+        settings.setValue("",dir);
+
+
+
+
         QMessageBox::information(this, "Bravo", dir);
+
+        //QSettings::settings.value(dir);
 
     }
 
