@@ -26,6 +26,8 @@ public:
     explicit ImageLibrary(QWidget *parent = 0);//when we have we have a form we use explicit(but here we dun have don't panic)
     ~ImageLibrary();
     void go();
+    void addItem(const QString &);
+
 
 private:
     QStringListModel  model;

@@ -24,31 +24,50 @@ Worker::Worker(const QString & path):path(path)
 
 void Worker::process()
 {
-  QStringList List ;
-  QFileInfo file;
-  file.setFile(path);
 
-  if(file.isFile())
-  {
-      List.append(path);
+    QStringList list;
+    list.append(path);
+
+    QStringList filters;
+    filters << "*.png" << "*.jpg" << "*.jpeg";
+
+    while(!(list.isEmpty()))
+    {
+        QFileInfo x = list[0];
+        if(x.isDir())
+        {
+            QDir chemin = list[0];
+            //chemin.setNameFilters(filters);
+            QList<QFileInfo> petiteListe = chemin.entryInfoList();
+            foreach (QFileInfo val, petiteListe)
+            {
+                if(val.isDir())
+                {
+                    list.append(val.absoluteFilePath());
+
+                }
+
+                /*if(val == "*.png")
+                {
+                    list.append(val.absoluteFilePath());
+
+                }*/
 
 
-  }
-  else
-  {
-      while(file.isDir())
-      {
-          List.append(path);
 
-      }
+            }
+        }
+        else
+        {
+            QString val = x.absoluteFilePath();
+            emit newItem(val);
+        }
 
-  }
-
-
-
-
+        list.removeFirst();
+    }
 
 }
+
 void ImageLibrary::go()
 {
 
@@ -59,6 +78,8 @@ void ImageLibrary::go()
                                                     newDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
+
+
     if(dir.isEmpty())
     {
         QMessageBox::warning(this,"warning","Dir is empty ");
@@ -75,6 +96,9 @@ void ImageLibrary::go()
         //QSettings::settings.value(dir);
 
     }
+     Worker worker(dir);
+     QObject::connect(&worker,&Worker::newItem,this,&ImageLibrary::addItem);
+     worker.process();
 
 
 
@@ -85,3 +109,8 @@ ImageLibrary::~ImageLibrary()
 {
 
 }
+void ImageLibrary::addItem (const QString & item)
+   {
+     QStringList list = model.stringList ();
+      model.setStringList (list << item);
+    }
