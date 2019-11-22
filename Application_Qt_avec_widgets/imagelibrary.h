@@ -1,5 +1,6 @@
 #ifndef IMAGELIBRARY_H
 #define IMAGELIBRARY_H
+#define THUMBNAIL_SIZE 128 /*taille de iamge*/
 #include <QFileDialog>
 #include <QStringListModel>
 #include <QMainWindow>
@@ -16,12 +17,38 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QImage>
 #include <QAbstractListModel>
+class Item// : public QObject
+{
+//    Q_OBJECT
+
+
+public:
+    QString path;
+    QImage thumbnail;
+    Item (const QString &, const QImage &);
+
+};
+class  Model : public QAbstractListModel
+{
+
+ private:
+    QList<Item> items;
+  public:
+    int rowCount(const QModelIndex &)const;
+    QVariant data(const QModelIndex  &,int)const;
+    Model ();
+    void addItem(const QString & ,const QImage & );
+    //void beginInsertRows(const QModelIndex &,int ,int);
+    //void endInsertRows();
+
+};
+
 class ImageLibrary : public QMainWindow
 {
     Q_OBJECT
 
 private:
-    QStringListModel model;
+    Model model;
     QListView view ;
     QToolBar toolbar;
 
@@ -44,32 +71,15 @@ private:
 public:
     Worker (const QString &);
     void process();
+    static QImage Thumbnail(const QString&);
 
 signals:
-    void newItem(const QString &);
+    void newItem(const QString & ,const QImage);
     void finished();
 };
-class Item// : public QObject
-{
-//    Q_OBJECT
 
 
-public:
-    QString path;
-    QImage thumbnail;
-    Item (const QString &, const QImage &);
-
-};
-class  Model : public QAbstractListModel
-{
- private:
-    QList<Item> items;
-  public:
-    int rowCount(const QModelIndex &)const;
-    QVariant data(const QModelIndex  &,int)const;
-    Model (const QList<Item> &);
-    addItem(const QString & );
 
 
-};
+
 #endif // IMAGELIBRARY_H

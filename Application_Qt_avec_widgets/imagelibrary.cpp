@@ -1,7 +1,7 @@
 #include "imagelibrary.h"
 
 
-ImageLibrary::ImageLibrary(QWidget *parent):QMainWindow(parent),model(parent),view(parent),toolbar(parent)
+ImageLibrary::ImageLibrary(QWidget *parent):QMainWindow(parent),model(),view(parent),toolbar(parent)
 {
     view.setModel(&model);
     toolbar.addAction ("GO !", this, & ImageLibrary::go);
@@ -45,7 +45,7 @@ void ImageLibrary::go()
     connect (worker, &Worker::finished, worker, &Worker::deleteLater);
     connect (thread, &QThread::finished, thread, &QThread::deleteLater);
     */
-    connect(worker,&Worker::newItem,this,&ImageLibrary::addItem);
+    connect(worker,&Worker::newItem,&model,&Model::addItem);
     //thread->start ();
     QtConcurrent::run([worker](){worker->process();});
 
@@ -54,8 +54,8 @@ void ImageLibrary::go()
 }
 void ImageLibrary::addItem (const QString & item)
 {
-  QStringList list = model.stringList ();
-  model.setStringList (list << item);
+  //QStringList list = model.stringList ();
+  //model.setStringList (list << item);
 }
 Worker::Worker(const QString & path):path(path){
 
@@ -108,7 +108,8 @@ void Worker::process()
         else
         {
             QString val = x.absoluteFilePath();
-            emit newItem(val);
+            QImage image =Thumbnail(val);
+            emit newItem(val,image);
         }
 
         list.removeFirst();
@@ -122,7 +123,7 @@ Item::Item (const QString  & path, const QImage & thumbnail):path(path),thumbnai
 /*
  *Class Model
 */
-Model::Model(const QList<Item> & items):items(items){}
+Model::Model(){}
 
 int Model::rowCount(const QModelIndex & parent)const{
     if(parent.isValid())
@@ -139,15 +140,31 @@ QVariant Model::data(const QModelIndex  & index,int role)const{
             case Qt::ToolTipRole:
                 return items[index.row()].path;
             case Qt::DecorationRole:
-                return items[index.row()].thumbnail;
+                return QPixmap::fromImage(items[index.row()].thumbnail);
             case Qt::SizeHintRole:
                 return items[index.row()].thumbnail.size();
+            default:
+                       return QVariant();
+
     }
    }
     else
     {
         return QVariant();
     }
+}
+void Model::addItem(const QString & path ,const QImage & thumbnail)
+{    int nbelement = items.size();
+     beginInsertRows(QModelIndex(), nbelement,nbelement);
+     items.append(Item(path,thumbnail));
+     endInsertRows();
+    }
+QImage Worker::Thumbnail(const QString & path)
+{
+    QSize size(THUMBNAIL_SIZE,THUMBNAIL_SIZE);
+    QImage image (path);
+    image = image.scaled(size,Qt::KeepAspectRatio);
+    return image;
 }
 
 ImageLibrary::~ImageLibrary()
