@@ -1,9 +1,6 @@
 #ifndef IMAGELIBRARY_H
 #define IMAGELIBRARY_H
-<<<<<<< HEAD
 #define THUMBNAIL_SIZE 128 /*taille de iamge*/
-=======
->>>>>>> 5879228613ee131dfa84903d838298fb427b9d16
 #include <QFileDialog>
 #include <QStringListModel>
 #include <QMainWindow>
@@ -18,7 +15,6 @@
 #include <QFileInfo>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
-
 #include <QImage>
 #include <QAbstractListModel>
 class Item// : public QObject
@@ -47,18 +43,12 @@ class  Model : public QAbstractListModel
 
 };
 
-=======
->>>>>>> 5879228613ee131dfa84903d838298fb427b9d16
 class ImageLibrary : public QMainWindow
 {
     Q_OBJECT
 
 private:
-<<<<<<< HEAD
     Model model;
-=======
-    QStringListModel model;
->>>>>>> 5879228613ee131dfa84903d838298fb427b9d16
     QListView view ;
     QToolBar toolbar;
 
@@ -81,7 +71,6 @@ private:
 public:
     Worker (const QString &);
     void process();
-<<<<<<< HEAD
     static QImage Thumbnail(const QString&);
 
 signals:
@@ -93,11 +82,4 @@ signals:
 
 
 
-=======
-
-signals:
-    void newItem(const QString &);
-    void finished();
-};
->>>>>>> 5879228613ee131dfa84903d838298fb427b9d16
 #endif // IMAGELIBRARY_H

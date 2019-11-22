@@ -1,11 +1,7 @@
 #include "imagelibrary.h"
 
 
-<<<<<<< HEAD
 ImageLibrary::ImageLibrary(QWidget *parent):QMainWindow(parent),model(),view(parent),toolbar(parent)
-=======
-ImageLibrary::ImageLibrary(QWidget *parent):QMainWindow(parent),model(parent),view(parent),toolbar(parent)
->>>>>>> 5879228613ee131dfa84903d838298fb427b9d16
 {
     view.setModel(&model);
     toolbar.addAction ("GO !", this, & ImageLibrary::go);
@@ -16,10 +12,7 @@ void ImageLibrary::go()
 {
     QSettings content;//we set up our QSettings object
     QString newDir = content.value("",QDir::homePath()).toString();//we set upa new dir by putting the value of homepath in content and setting it to newdir
-<<<<<<< HEAD
 
-=======
->>>>>>> 5879228613ee131dfa84903d838298fb427b9d16
 
 
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
@@ -56,39 +49,6 @@ void ImageLibrary::go()
     //thread->start ();
     QtConcurrent::run([worker](){worker->process();});
 
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                    newDir,//we put our predefinded variable in his place its replaces Qdir::homePATH()
-                                                    QFileDialog::ShowDirsOnly
-                                                    | QFileDialog::DontResolveSymlinks);
-    if(dir.isEmpty())
-       {
-           QMessageBox::warning(this,"warning","Dir is empty ");
-       }
-       else
-       {
-           content.setValue("",dir);//we save the dir where we was in content to replace it with homepath()
-           QMessageBox::information(this, "Bravo", dir,QMessageBox::Yes);
-           //QSettings::settings.value(dir);
-
-       }
-   /*
-        Worker worker(dir);
-        QObject::connect(&worker,&Worker::newItem,this,&ImageLibrary::addItem);
-        worker.process();
-        */
-
-    //QThread * thread = new QThread;
-    Worker * worker = new Worker (dir);
-    /*
-    worker->moveToThread (thread);
-    connect (thread, &QThread::started, worker, &Worker::process);
-    connect (worker, &Worker::finished, thread, &QThread::quit);
-    connect (worker, &Worker::finished, worker, &Worker::deleteLater);
-    connect (thread, &QThread::finished, thread, &QThread::deleteLater);
-    */
-    connect(worker,&Worker::newItem,this,&ImageLibrary::addItem);
-    //thread->start ();
-    QtConcurrent::run([worker](){worker->process();});
 
 
 }
@@ -100,17 +60,6 @@ void ImageLibrary::addItem (const QString & item)
 Worker::Worker(const QString & path):path(path){
 
 }
-<<<<<<< HEAD
-=======
-void ImageLibrary::addItem (const QString & item)
-{
-  QStringList list = model.stringList ();
-  model.setStringList (list << item);
-}
-Worker::Worker(const QString & path):path(path){
-
-}
->>>>>>> 5879228613ee131dfa84903d838298fb427b9d16
 
 //Worker:: ~Worker(){}
 
@@ -168,7 +117,6 @@ void Worker::process()
     emit finished();
 }
 
-<<<<<<< HEAD
 Item::Item (const QString  & path, const QImage & thumbnail):path(path),thumbnail(thumbnail)
 {
 }
@@ -222,10 +170,3 @@ QImage Worker::Thumbnail(const QString & path)
 ImageLibrary::~ImageLibrary()
 {
 }
-=======
-
-ImageLibrary::~ImageLibrary()
-{
-}
-
->>>>>>> 5879228613ee131dfa84903d838298fb427b9d16
