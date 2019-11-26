@@ -37,7 +37,7 @@ class  Model : public QAbstractListModel
     int rowCount(const QModelIndex &)const;
     QVariant data(const QModelIndex  &,int)const;
     Model ();
-    void addItem(const QString & ,const QImage & );
+    void addItem(const Item & );
     //void beginInsertRows(const QModelIndex &,int ,int);
     //void endInsertRows();
 
@@ -58,7 +58,8 @@ public:
     ImageLibrary(QWidget *parent = nullptr);
     ~ImageLibrary();
     void go();
-    void addItem (const QString & );
+    //void addItem (const QString & ,const QImage &);
+    void addItem (const QString &);
 };
 
 class Worker : public QObject
@@ -67,15 +68,24 @@ class Worker : public QObject
 
 private:
     QString path;
+    QFutureWatcher<Item> watcher;
+    QFuture<Item> future;
+
 
 public:
+
+
     Worker (const QString &);
+
     void process();
     static QImage Thumbnail(const QString&);
-
+    static Item MappedItem(const QString &);
+    void processItem(int );
 signals:
-    void newItem(const QString & ,const QImage);
+    //void newItem(const QString & ,const QImage);
+    void newItem(const Item);
     void finished();
+
 };
 
 

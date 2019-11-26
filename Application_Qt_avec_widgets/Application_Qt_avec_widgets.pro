@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-
+QT       += concurrent
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Application_Qt_avec_widgets

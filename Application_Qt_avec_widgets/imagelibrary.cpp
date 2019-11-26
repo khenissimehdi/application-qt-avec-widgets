@@ -74,7 +74,7 @@ void Worker::process()
 
     QStringList list;//create a list
     list.append(path);//add path to the list
-
+    connect(&watcher,&QFutureWatcher<Item>::resultReadyAt,this,&Worker::processItem);
     //QStringList filters;//create a filter
     //filters << "*.png" << "*.jpg" << "*.jpeg";
 
@@ -109,7 +109,7 @@ void Worker::process()
         {
             QString val = x.absoluteFilePath();
             QImage image =Thumbnail(val);
-            emit newItem(val,image);
+            //emit newItem(val,image);
         }
 
         list.removeFirst();
@@ -153,12 +153,19 @@ QVariant Model::data(const QModelIndex  & index,int role)const{
         return QVariant();
     }
 }
+void Model::addItem(const Item & item)
+{    int nbelement = items.size();
+     beginInsertRows(QModelIndex(), nbelement,nbelement);
+     items.append(item);
+     endInsertRows();
+    }
+/*
 void Model::addItem(const QString & path ,const QImage & thumbnail)
 {    int nbelement = items.size();
      beginInsertRows(QModelIndex(), nbelement,nbelement);
      items.append(Item(path,thumbnail));
      endInsertRows();
-    }
+    }*/
 QImage Worker::Thumbnail(const QString & path)
 {
     QSize size(THUMBNAIL_SIZE,THUMBNAIL_SIZE);
@@ -166,7 +173,16 @@ QImage Worker::Thumbnail(const QString & path)
     image = image.scaled(size,Qt::KeepAspectRatio);
     return image;
 }
+Item Worker::MappedItem(const QString & path)
+{
+    QImage image(path);
+    return Item(path,image);
+}
+void Worker::processItem(int k)
+{
+    emit newItem(watcher.resultAt(k));
 
+}
 ImageLibrary::~ImageLibrary()
 {
 }
