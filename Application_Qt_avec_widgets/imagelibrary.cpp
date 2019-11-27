@@ -81,36 +81,47 @@ void Worker::process()
     while(!(list.isEmpty()))
     {
         QFileInfo x = list[0];
+        QDir chemin = list[0];
+        //chemin.setNameFilters(filters);
+        QList<QFileInfo> petiteListe = chemin.entryInfoList();
         if(x.isDir())
         {
-            QDir chemin = list[0];
-            //chemin.setNameFilters(filters);
-            QList<QFileInfo> petiteListe = chemin.entryInfoList();
+
             petiteListe.removeAt(0);
             petiteListe.removeAt(0);
 
             foreach (QFileInfo val, petiteListe)
             {
+
                 QFileInfo fi(val);
                 QString ext = fi.suffix();
                 if(val.isDir())
                 {
                    path=val.absoluteFilePath();
                    process();
+
                 }
 
                 else if (val.isFile() and (ext=="png" or ext=="jpg" or ext=="jpeg")){
                     list.append(val.absoluteFilePath());
 
+
                 }
+
             }
+         //QList<QFileInfo> liste=petiteListe;
         }
         else
         {
-            QString val = x.absoluteFilePath();
+
+
+            /*QString val = x.absoluteFilePath();
             QImage image =Thumbnail(val);
-            //emit newItem(val,image);
-        }
+            emit newItem(val,image);
+            */
+            future=QtConcurrent::mapped(petiteListe,MappedItem);
+            watcher.setFuture(future);
+            watcher.waitForFinished();        }
 
         list.removeFirst();
     }

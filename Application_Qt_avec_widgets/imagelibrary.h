@@ -38,6 +38,7 @@ class  Model : public QAbstractListModel
     QVariant data(const QModelIndex  &,int)const;
     Model ();
     void addItem(const Item & );
+    void setThumbnail();
     //void beginInsertRows(const QModelIndex &,int ,int);
     //void endInsertRows();
 
@@ -85,6 +86,7 @@ signals:
     //void newItem(const QString & ,const QImage);
     void newItem(const Item);
     void finished();
+    void newThumbnail();
 
 };
 
