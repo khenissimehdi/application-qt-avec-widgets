@@ -1,9 +1,15 @@
 #include "imagelibrary.h"
 
+Item::Item()
+{
 
+}
 ImageLibrary::ImageLibrary(QWidget *parent):QMainWindow(parent),model(),view(parent),toolbar(parent)
 {
+    QSize size(THUMBNAIL_SIZE,THUMBNAIL_SIZE);
     view.setModel(&model);
+    view.setViewMode(QListView::IconMode);
+    view.setGridSize(size);
     toolbar.addAction ("GO !", this, & ImageLibrary::go);
     addToolBar(&toolbar);
     setCentralWidget(&view);
@@ -11,7 +17,7 @@ ImageLibrary::ImageLibrary(QWidget *parent):QMainWindow(parent),model(),view(par
 void ImageLibrary::go()
 {
     QSettings content;//we set up our QSettings object
-    QString newDir = content.value("",QDir::homePath()).toString();//we set upa new dir by putting the value of homepath in content and setting it to newdir
+    QString newDir = content.value("homePath",QDir::homePath()).toString();//we set upa new dir by putting the value of homepath in content and setting it to newdir
 
 
 
@@ -25,7 +31,7 @@ void ImageLibrary::go()
        }
        else
        {
-           content.setValue("",dir);//we save the dir where we was in content to replace it with homepath()
+           content.setValue("homePath",dir);//we save the dir where we was in content to replace it with homepath()
            QMessageBox::information(this, "Bravo", dir,QMessageBox::Yes);
            //QSettings::settings.value(dir);
 
@@ -58,7 +64,7 @@ void ImageLibrary::addItem (const QString & item)
   //model.setStringList (list << item);
 }
 Worker::Worker(const QString & path):path(path){
-
+connect(&watcher,&QFutureWatcher<Item>::resultReadyAt,this,&Worker::processItem);
 }
 
 //Worker:: ~Worker(){}
@@ -74,57 +80,56 @@ void Worker::process()
 
     QStringList list;//create a list
     list.append(path);//add path to the list
-    connect(&watcher,&QFutureWatcher<Item>::resultReadyAt,this,&Worker::processItem);
+
     //QStringList filters;//create a filter
     //filters << "*.png" << "*.jpg" << "*.jpeg";
+    QStringList toPrint;
 
     while(!(list.isEmpty()))
     {
+
         QFileInfo x = list[0];
-        QDir chemin = list[0];
-        //chemin.setNameFilters(filters);
-        QList<QFileInfo> petiteListe = chemin.entryInfoList();
         if(x.isDir())
         {
-
-            petiteListe.removeAt(0);
-            petiteListe.removeAt(0);
+            QDir chemin = list[0];
+            //chemin.setNameFilters(filters);
+            QList<QFileInfo> petiteListe = chemin.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
             foreach (QFileInfo val, petiteListe)
             {
-
                 QFileInfo fi(val);
                 QString ext = fi.suffix();
                 if(val.isDir())
                 {
                    path=val.absoluteFilePath();
                    process();
-
                 }
 
                 else if (val.isFile() and (ext=="png" or ext=="jpg" or ext=="jpeg")){
                     list.append(val.absoluteFilePath());
 
-
                 }
-
             }
-         //QList<QFileInfo> liste=petiteListe;
         }
         else
         {
 
+            toPrint.append(list[0]);
 
-            /*QString val = x.absoluteFilePath();
+            /*
+            QString val = x.absoluteFilePath();
             QImage image =Thumbnail(val);
-            emit newItem(val,image);
+            //emit newItem(val,image);
             */
-            future=QtConcurrent::mapped(petiteListe,MappedItem);
-            watcher.setFuture(future);
-            watcher.waitForFinished();        }
+        }
 
         list.removeFirst();
     }
+
+    future=QtConcurrent::mapped(toPrint,MappedItem);
+    watcher.setFuture(future);
+    watcher.waitForFinished();
+
     emit finished();
 }
 
@@ -186,8 +191,8 @@ QImage Worker::Thumbnail(const QString & path)
 }
 Item Worker::MappedItem(const QString & path)
 {
-    QImage image(path);
-    return Item(path,image);
+    //QImage image(path);
+    return Item(path,Thumbnail(path));
 }
 void Worker::processItem(int k)
 {
